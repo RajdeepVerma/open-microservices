@@ -1,4 +1,4 @@
-# open-microservice
+# open-microservices
 
 An open repository of production-grade microservices and service-level implementation patterns by Raj (Rajdeep Verma), built for everyone to use, learn from, and contribute back to.
 
@@ -72,7 +72,7 @@ Contribution Guidelines: if this repository helps you build, learn, or ship fast
 
 ## Contributors
 
-Thanks to everyone who contributes time, code, fixes, ideas, and documentation to `open-microservice`.
+Thanks to everyone who contributes time, code, fixes, ideas, and documentation to `open-microservices`.
 
 <p align="left">
   <a href="https://github.com/RajdeepVerma">
