@@ -19,6 +19,7 @@ FastAPI service that queries Iroha Torii for transaction status by transaction h
 - `iroha_protocol.py` - Iroha binary protocol encode/decode logic
 - `scale_codec.py` - SCALE primitive helpers
 - `env_loader.py` - simple `.env` loader
+- `logging_config.py` - structured logging and request ID correlation
 
 ## Requirements
 
@@ -44,6 +45,9 @@ Expected sections:
 ### Environment variables
 
 - `PORT` (default: `8000`)
+- `LOG_LEVEL` (default: `INFO`)
+- `LOG_JSON` (`1` enables JSON logs, default `1`)
+- `ENABLE_SERVER_ACCESS_LOGS` (`1` keeps gunicorn/uvicorn access logs, default `0`)
 - `QUERY_TIMEOUT` (default: `30`)
 - `CLIENT_TOML_PATH` (default: `client.toml`)
 - `MAX_HTTP_CONNECTIONS` (default: `500`)
@@ -127,6 +131,13 @@ Typical response:
   "status": "COMMITTED"
 }
 ```
+
+## Logging
+
+- App logs are JSON by default for production ingestion.
+- Every request gets an `X-Request-ID` response header for trace correlation.
+- Request completion and failure logs include method, path, status, duration, and client IP.
+- Set `LOG_JSON=0` for readable text logs during local development.
 
 ## Author
 

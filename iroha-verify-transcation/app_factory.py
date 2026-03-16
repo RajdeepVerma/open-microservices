@@ -1,15 +1,22 @@
 """App wiring: lifecycle resources + route registration."""
 
+import logging
 import os
+import time
+import uuid
 from contextlib import asynccontextmanager
 
 import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
 
 from api_routes import router
 from env_loader import load_env_file
+from logging_config import clear_request_id, configure_logging, set_request_id
 from runtime_config import load_client_config
+
+logger = logging.getLogger(__name__)
+request_logger = logging.getLogger("app.request")
 
 
 @asynccontextmanager
@@ -33,16 +40,27 @@ async def lifespan(app: FastAPI):
             max_keepalive_connections=max_keepalive_connections,
         )
     )
+    logger.info(
+        "Application startup complete",
+        extra={
+            "torii_url": default_runtime_config.torii_url,
+            "max_connections": max_connections,
+            "max_keepalive_connections": max_keepalive_connections,
+        },
+    )
 
     try:
         yield
     finally:
+        logger.info("Application shutdown started")
         await app.state.http_client.aclose()
+        logger.info("Application shutdown complete")
 
 
 def create_app() -> FastAPI:
     # Load .env before reading runtime defaults from os.environ.
     load_env_file()
+    configure_logging()
 
     app = FastAPI(
         title="Iroha Transaction Status API",
@@ -50,6 +68,44 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
         default_response_class=ORJSONResponse,
     )
+
+    @app.middleware("http")
+    async def request_logging_middleware(request: Request, call_next):
+        request_id = request.headers.get("x-request-id", "").strip() or uuid.uuid4().hex
+        set_request_id(request_id)
+        started = time.perf_counter()
+
+        try:
+            response = await call_next(request)
+        except Exception:
+            duration_ms = (time.perf_counter() - started) * 1000
+            request_logger.exception(
+                "Request failed",
+                extra={
+                    "method": request.method,
+                    "path": request.url.path,
+                    "duration_ms": round(duration_ms, 3),
+                    "client_ip": request.client.host if request.client else None,
+                },
+            )
+            clear_request_id()
+            raise
+
+        duration_ms = (time.perf_counter() - started) * 1000
+        response.headers["X-Request-ID"] = request_id
+        request_logger.info(
+            "Request completed",
+            extra={
+                "method": request.method,
+                "path": request.url.path,
+                "status_code": response.status_code,
+                "duration_ms": round(duration_ms, 3),
+                "client_ip": request.client.host if request.client else None,
+            },
+        )
+        clear_request_id()
+        return response
+
     # Keep API endpoints isolated in a dedicated router module.
     app.include_router(router)
     return app

@@ -1,6 +1,7 @@
 """HTTP boundary layer: query params, error mapping, and responses."""
 
 import binascii
+import logging
 import os
 import tomllib
 
@@ -13,6 +14,7 @@ from transaction_service import fetch_transaction_status
 router = APIRouter()
 # Read once at import; override per request via query arg.
 QUERY_TIMEOUT_DEFAULT = int(os.getenv("QUERY_TIMEOUT", "30"))
+logger = logging.getLogger(__name__)
 
 
 @router.get("/health")
@@ -46,16 +48,20 @@ async def transaction_status(
         )
     except ValueError as exc:
         # Bad hash/key formatting and other client input issues.
+        logger.warning("Rejected invalid request input: %s", exc)
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except (KeyError, FileNotFoundError, tomllib.TOMLDecodeError) as exc:
         # Misconfigured client.toml should be treated as server configuration errors.
+        logger.exception("Invalid client.toml configuration")
         raise HTTPException(status_code=500, detail=f"Invalid client.toml: {exc}") from exc
     except httpx.HTTPStatusError as exc:
         # Preserve upstream Torii status/details whenever possible.
         response = exc.response
         code = response.status_code if response is not None else 502
         detail = response.text if response is not None else str(exc)
+        logger.warning("Upstream Torii HTTP error", extra={"status_code": code})
         raise HTTPException(status_code=code, detail=detail) from exc
     except (httpx.RequestError, RuntimeError, binascii.Error) as exc:
         # Transport/protocol failures are exposed as Bad Gateway.
+        logger.exception("Failed while querying Torii")
         raise HTTPException(status_code=502, detail=str(exc)) from exc

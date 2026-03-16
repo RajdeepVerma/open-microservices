@@ -25,17 +25,22 @@ Areas covered in this repository may include:
 - database-backed backend services
 - containerized development and deployment setups
 
+## Current Services
+
+- `iroha-verify-transcation/` - FastAPI service for querying Iroha transaction status by transaction hash, with shared HTTP connection pooling and structured request logging.
+
 ## Repository Structure
 
-The repository will expand over time as new services are published. A typical structure may look like this:
+The repository will expand over time as new services are published. The current repository includes service-level code directly at the top level, and may grow into a broader structure over time:
 
 ```text
 .
-├── services/
-│   ├── service-a/
-│   └── service-b/
-├── shared/
-├── scripts/
+├── iroha-verify-transcation/
+│   ├── README.md
+│   ├── Dockerfile
+│   ├── app_factory.py
+│   ├── api_routes.py
+│   └── ...
 └── README.md
 ```
 
@@ -56,6 +61,7 @@ As the repository grows, it will include:
 - local development and container setup
 - operational and deployment notes
 - documentation for architecture and service boundaries
+- structured logging and production-oriented runtime configuration where appropriate
 
 ## Getting Started
 
