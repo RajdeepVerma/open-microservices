@@ -70,6 +70,24 @@ Suggestions, issues, and contributions are welcome. This repository is open for 
 
 Contribution Guidelines: if this repository helps you build, learn, or ship faster, contribute back in some form, whether through code, fixes, ideas, documentation, or improvements. Around here, useful usage tends to come with a small moral debt to leave things better than you found them.
 
+## Contributors
+
+Thanks to everyone who contributes time, code, fixes, ideas, and documentation to `open-microservice`.
+
+<p align="left">
+  <a href="https://github.com/RajdeepVerma">
+    <img src="https://github.com/RajdeepVerma.png?size=96" width="72" height="72" alt="Rajdeep Verma" />
+  </a>
+  <a href="https://github.com/open-microservices">
+    <img src="https://via.placeholder.com/72?text=%2B" width="72" height="72" alt="Future contributor" />
+  </a>
+  <a href="https://github.com/open-microservices">
+    <img src="https://via.placeholder.com/72?text=%2B" width="72" height="72" alt="Future contributor" />
+  </a>
+</p>
+
+Rajdeep Verma is the first contributor here. The next spots are open for future contributors.
+
 ## License
 
 This project is licensed under the terms in [LICENSE](LICENSE).
