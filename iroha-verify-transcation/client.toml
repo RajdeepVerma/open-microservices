@@ -1,0 +1,11 @@
+chain = "ed966b3b-266e-4ec0-8c0a-0660fa86d761"
+torii_url = "http://10.11.11.11:8080/"
+
+[basic_auth]
+web_login = "mad_hatter"
+password = "ilovetea"
+
+[account]
+domain = "saloneledger"
+public_key = "ed0120E7C5A8B06FF30580749A65A3BE27022C453D288CBC4676F939B77155195C779E"
+private_key = "802620A1A81FDAA9A4D8CF3F7F3A745F31F2E6121A981C6BA2CA50B1F667093B72DA19"

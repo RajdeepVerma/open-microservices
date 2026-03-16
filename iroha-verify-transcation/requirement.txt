@@ -1,0 +1,7 @@
+httpx
+cryptography
+fastapi
+uvicorn
+gunicorn
+uvloop
+orjson
