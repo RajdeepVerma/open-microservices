@@ -46,7 +46,9 @@ Expected sections:
 
 - `PORT` (default: `8000`)
 - `LOG_LEVEL` (default: `INFO`)
-- `LOG_JSON` (`1` enables JSON logs, default `1`)
+- `LOG_FORMAT` (`simple`, `text`, `logfmt`, `json`; `color` alias to `simple`; `otlp`/`oltp` alias to `logfmt`; default `simple`)
+- `LOG_COLOR` (`auto`, `1`, `0`; default `1`)
+- `LOG_JSON` (legacy compatibility switch; prefer `LOG_FORMAT`)
 - `ENABLE_SERVER_ACCESS_LOGS` (`1` keeps gunicorn/uvicorn access logs, default `0`)
 - `QUERY_TIMEOUT` (default: `30`)
 - `CLIENT_TOML_PATH` (default: `client.toml`)
@@ -134,10 +136,11 @@ Typical response:
 
 ## Logging
 
-- App logs are JSON by default for production ingestion.
+- Default logs are colorized `simple` mode for interactive terminal use.
 - Every request gets an `X-Request-ID` response header for trace correlation.
 - Request completion and failure logs include method, path, status, duration, and client IP.
-- Set `LOG_JSON=0` for readable text logs during local development.
+- For Grafana or Loki pipelines, set `LOG_FORMAT=logfmt` or `LOG_FORMAT=otlp`.
+- If you still want JSON logs, set `LOG_FORMAT=json`.
 
 ## Author
 
