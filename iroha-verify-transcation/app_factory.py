@@ -43,6 +43,7 @@ async def lifespan(app: FastAPI):
     logger.info(
         "Application startup complete",
         extra={
+            "scenario": "app_startup_complete",
             "torii_url": default_runtime_config.torii_url,
             "max_connections": max_connections,
             "max_keepalive_connections": max_keepalive_connections,
@@ -52,9 +53,9 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
-        logger.info("Application shutdown started")
+        logger.info("Application shutdown started", extra={"scenario": "app_shutdown_started"})
         await app.state.http_client.aclose()
-        logger.info("Application shutdown complete")
+        logger.info("Application shutdown complete", extra={"scenario": "app_shutdown_complete"})
 
 
 def create_app() -> FastAPI:
@@ -82,6 +83,7 @@ def create_app() -> FastAPI:
             request_logger.exception(
                 "Request failed",
                 extra={
+                    "scenario": "request_failed",
                     "method": request.method,
                     "path": request.url.path,
                     "duration_ms": round(duration_ms, 3),
@@ -96,9 +98,11 @@ def create_app() -> FastAPI:
         request_logger.info(
             "Request completed",
             extra={
+                "scenario": "request_completed",
                 "method": request.method,
                 "path": request.url.path,
                 "status_code": response.status_code,
+                "status_family": f"{response.status_code // 100}xx",
                 "duration_ms": round(duration_ms, 3),
                 "client_ip": request.client.host if request.client else None,
             },

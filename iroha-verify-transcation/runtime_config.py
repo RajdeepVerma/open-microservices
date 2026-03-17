@@ -1,5 +1,6 @@
 """Runtime config loading and request-time config cache helpers."""
 
+import logging
 import os
 import tomllib
 from dataclasses import dataclass
@@ -7,6 +8,8 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from fastapi import Request
+
+logger = logging.getLogger(__name__)
 
 
 def parse_private_key_seed(private_key: str) -> bytes:
@@ -52,6 +55,15 @@ def load_client_config(client_toml: str) -> ClientRuntimeConfig:
 
     # Parse once to avoid expensive key construction in the request hot path.
     signing_key = Ed25519PrivateKey.from_private_bytes(private_seed)
+    logger.info(
+        "Loaded client runtime configuration",
+        extra={
+            "scenario": "client_config_loaded",
+            "client_toml_path": client_toml_path,
+            "torii_url": torii_url,
+            "has_basic_auth": auth is not None,
+        },
+    )
     return ClientRuntimeConfig(
         authority=authority,
         signing_key=signing_key,
@@ -67,12 +79,21 @@ def get_runtime_config(request: Request, client_toml: str | None) -> ClientRunti
     - custom client_toml paths are cached after first load
     """
     if client_toml is None:
+        logger.debug("Using default startup runtime config", extra={"scenario": "config_default_used"})
         return request.app.state.runtime_config
 
     cached = request.app.state.config_cache.get(client_toml)
     if cached is not None:
+        logger.debug(
+            "Using cached client runtime config",
+            extra={"scenario": "config_cache_hit", "client_toml_path": client_toml},
+        )
         return cached
 
     loaded = load_client_config(client_toml)
     request.app.state.config_cache[client_toml] = loaded
+    logger.info(
+        "Cached client runtime config",
+        extra={"scenario": "config_cache_miss_loaded", "client_toml_path": client_toml},
+    )
     return loaded

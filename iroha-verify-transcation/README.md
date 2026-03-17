@@ -134,6 +134,35 @@ Typical response:
 }
 ```
 
+## Frontend Error Handling
+
+Use the HTTP status code as the primary success or failure signal.
+
+- `200` - request succeeded and includes transaction status payload
+- `400` - invalid input, such as a malformed `tx_hash`
+- `500` - server-side configuration issue, such as an invalid `client.toml`
+- `502` - upstream Torii connection or transport failure
+- `504` - upstream Torii timeout
+
+Error responses follow:
+
+```json
+{"detail":"...error message..."}
+```
+
+Common examples:
+
+- `{"detail":"Cannot connect to Iroha Torii."}` for upstream connect failures (`502`)
+- `{"detail":"Iroha Torii timed out."}` for upstream timeout failures (`504`)
+
+Every response includes an `X-Request-ID` header. Frontend clients should capture it and attach it to support logs.
+
+Quick check:
+
+```bash
+curl -i "http://localhost:8000/transaction-status?tx_hash=<64_hex_hash>"
+```
+
 ## Logging
 
 - Default logs are colorized `simple` mode for interactive terminal use.
